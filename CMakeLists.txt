@@ -4,8 +4,10 @@ project(Renderer)
 
 find_package(glfw3 REQUIRED)
 find_package(glad CONFIG REQUIRED)
+find_package(glm CONFIG REQUIRED)
 
 add_executable(Renderer src/main.cpp)
 
 target_link_libraries(Renderer PRIVATE glfw)
 target_link_libraries(Renderer PRIVATE glad::glad)
+target_link_libraries(Renderer PRIVATE glm::glm)

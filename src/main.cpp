@@ -1,16 +1,20 @@
 #include <iostream>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
 
 // define source code for vertex shader (C)
 const char* vertexShaderSource =
     "#version 330 core\n"
+    "uniform mat4 mvp;\n"
     "layout (location = 0) in vec3 position;\n"
     "layout (location = 1) in vec3 color;\n"
     "out vec3 vertexColor;\n"
     "void main()\n"
     "{\n"
-    "    gl_Position = vec4(position, 1.0);\n"
+    "    gl_Position = mvp * vec4(position, 1.0);\n"
     "    vertexColor = color;\n"    
     "}\n";
 
@@ -144,6 +148,16 @@ int main() {
     glUseProgram(shaderProgram);
 
     GLint timeLocation = glGetUniformLocation(shaderProgram, "time");
+    glm::mat4 identity = glm::mat4(1.0f);
+    glm::mat4 transform = glm::translate(identity, glm::vec3(0.3f, 0.0f, 0.0f)) * 
+                          glm::rotate(identity, glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f)) *
+                          glm::scale(identity, glm::vec3(0.5f, 0.5f, 1.0f));
+    // GLint transformLocation = glGetUniformLocation(shaderProgram, "transform");
+
+    glm::mat4 view = glm::translate(identity, glm::vec3(0.0f, 0.0f, -3.0f));
+    glm::mat4 projection = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
+    glm::mat4 mvp = projection * view * transform;
+    GLint mvpLocation = glGetUniformLocation(shaderProgram, "mvp");
 
     // render loop
     while (!glfwWindowShouldClose(window)) {
@@ -151,6 +165,8 @@ int main() {
         glClear(GL_COLOR_BUFFER_BIT);
         // glDrawArrays(GL_TRIANGLES, 0, 3);
         glUniform1f(timeLocation, static_cast<float>(glfwGetTime()));
+        // glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(transform));
+        glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, glm::value_ptr(mvp));
         glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
         glfwSwapBuffers(window);
     }
