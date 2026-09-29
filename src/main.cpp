@@ -6,19 +6,29 @@
 const char* vertexShaderSource =
     "#version 330 core\n"
     "layout (location = 0) in vec3 position;\n"
+    "layout (location = 1) in vec3 color;\n"
+    "out vec3 vertexColor;\n"
     "void main()\n"
     "{\n"
     "    gl_Position = vec4(position, 1.0);\n"
+    "    vertexColor = color;\n"    
     "}\n";
 
 // define source code for fragment shader (C)
 const char* fragmentShaderSource =
     "#version 330 core\n"
+    "uniform float time;\n"
+    "in vec3 vertexColor;\n"
     "out vec4 fragmentColor;\n"
     "void main()\n"
     "{\n"
-    "    fragmentColor = vec4(0.2, 0.6, 1.0, 1.0);\n"
+    "    float red = sin(time) * 0.5 + 0.5;\n"
+    "    fragmentColor = vec4(red, vertexColor.g, vertexColor.b, 1.0);\n"
     "}\n";
+
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+    glViewport(0, 0, width, height);
+}
 
 int main() {
     // initialize glfw platform backend
@@ -43,14 +53,16 @@ int main() {
         return EXIT_FAILURE;
     }
 
-    glClearColor(0.9f, 0.5f, 0.2f, 1.0f);
+    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
+    glClearColor(0.5f, 0.0f, 0.5f, 1.0f);
 
     // CPU-side vertex data
     float vertices[] = {
-       -0.5f, -0.5f, 0.0f,
-        0.5f, -0.5f, 0.0f,
-        0.5f,  0.5f, 0.0f,
-       -0.5f,  0.5f, 0.0f
+        // verticies         // colors
+       -0.5f, -0.5f, 0.0f,   1.0f, 0.0f, 0.0f,
+        0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,
+        0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,
+       -0.5f,  0.5f, 0.0f,   0.0f, 0.0f, 1.0f
     };
 
     // specifies data itself
@@ -63,8 +75,10 @@ int main() {
     GLuint VAO;
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, nullptr);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, nullptr);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)(sizeof(float) * 3));
     glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
 
     GLuint indices[] = {
         0, 1, 2,
@@ -129,11 +143,14 @@ int main() {
     glDeleteShader(fragmentShader);
     glUseProgram(shaderProgram);
 
+    GLint timeLocation = glGetUniformLocation(shaderProgram, "time");
+
     // render loop
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
         glClear(GL_COLOR_BUFFER_BIT);
         // glDrawArrays(GL_TRIANGLES, 0, 3);
+        glUniform1f(timeLocation, static_cast<float>(glfwGetTime()));
         glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
         glfwSwapBuffers(window);
     }
