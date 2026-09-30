@@ -62,11 +62,17 @@ int main() {
 
     // CPU-side vertex data
     float vertices[] = {
-        // verticies         // colors
-       -0.5f, -0.5f, 0.0f,   1.0f, 0.0f, 0.0f,
-        0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,
-        0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,
-       -0.5f,  0.5f, 0.0f,   0.0f, 0.0f, 1.0f
+        // Back: indices 0-3
+        -0.5f, -0.5f, -0.5f,   1.0f, 0.0f, 0.0f,
+        0.5f, -0.5f, -0.5f,   0.0f, 0.0f, 1.0f,
+        0.5f,  0.5f, -0.5f,   1.0f, 0.0f, 0.0f,
+        -0.5f,  0.5f, -0.5f,   0.0f, 0.0f, 1.0f,
+
+        // Front: indices 4-7
+        -0.5f, -0.5f,  0.5f,   1.0f, 0.0f, 0.0f,
+        0.5f, -0.5f,  0.5f,   0.0f, 0.0f, 1.0f,
+        0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,   0.0f, 0.0f, 1.0f
     };
 
     // specifies data itself
@@ -83,10 +89,32 @@ int main() {
     glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)(sizeof(float) * 3));
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
+    glEnable(GL_DEPTH_TEST);
 
     GLuint indices[] = {
-        0, 1, 2,
-        0, 2, 3
+        // back
+        0, 2, 1,
+        0, 3, 2,
+
+        // front
+        4, 5, 6,
+        4, 6, 7,
+
+        // left
+        0, 7, 3,
+        0, 4, 7,
+
+        // right
+        1, 2, 6,
+        1, 6, 5,
+
+        // top
+        3, 7, 6,
+        3, 6, 2,
+
+        // bottom
+        0, 1, 5,
+        0, 5, 4
     };
 
     GLuint EBO;
@@ -149,9 +177,9 @@ int main() {
 
     GLint timeLocation = glGetUniformLocation(shaderProgram, "time");
     glm::mat4 identity = glm::mat4(1.0f);
-    glm::mat4 transform = glm::translate(identity, glm::vec3(0.3f, 0.0f, 0.0f)) * 
-                          glm::rotate(identity, glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f)) *
-                          glm::scale(identity, glm::vec3(0.5f, 0.5f, 1.0f));
+    glm::mat4 transform = //glm::translate(identity, glm::vec3(0.3f, 0.0f, 0.0f)) * 
+                          glm::rotate(identity, glm::radians(45.0f), glm::vec3(1.0f, 1.0f, 1.0f)) *
+                          glm::scale(identity, glm::vec3(1.2f, 1.2f, 1.2f));
     // GLint transformLocation = glGetUniformLocation(shaderProgram, "transform");
 
     glm::mat4 view = glm::translate(identity, glm::vec3(0.0f, 0.0f, -3.0f));
@@ -162,7 +190,7 @@ int main() {
     // render loop
     while (!glfwWindowShouldClose(window)) {
         glfwPollEvents();
-        glClear(GL_COLOR_BUFFER_BIT);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         // glDrawArrays(GL_TRIANGLES, 0, 3);
         glUniform1f(timeLocation, static_cast<float>(glfwGetTime()));
         // glUniformMatrix4fv(transformLocation, 1, GL_FALSE, glm::value_ptr(transform));
