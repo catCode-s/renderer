@@ -6,7 +6,7 @@ find_package(glfw3 REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 
-add_executable(Renderer src/main.cpp)
+add_executable(Renderer src/main.cpp src/camera.cpp)
 
 target_link_libraries(Renderer PRIVATE glfw)
 target_link_libraries(Renderer PRIVATE glad::glad)
