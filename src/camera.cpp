@@ -1,5 +1,9 @@
 #include "camera.h"
 
+/**
+ * constructor for camera class
+ * initializes camera position, orientation, and movement parameters
+ */
 Camera::Camera() {
     cameraPosition = glm::vec3(0.0f, 0.0f, 3.0f);
     cameraFront = glm::vec3(0.0f, 0.0f, -1.0f);
@@ -14,10 +18,19 @@ Camera::Camera() {
     mouseSensitivity = 0.1f;
 }
 
+/**
+ * get the view matrix for the camera
+ * @return view matrix based on camera position and orientation
+ */
 glm::mat4 Camera::getViewMatrix() const {
     return glm::lookAt(cameraPosition, cameraPosition + cameraFront, cameraUp);
 }
 
+/**
+ * update camera position based on user input
+ * @param window pointer to the GLFW window
+ * @param deltaTime time elapsed since last frame
+ */
 void Camera::cameraMovement(GLFWwindow* window, float deltaTime) {
     float velocity = cameraSpeed * deltaTime;
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
@@ -30,15 +43,19 @@ void Camera::cameraMovement(GLFWwindow* window, float deltaTime) {
         cameraPosition += cameraRight * velocity;
 }
 
+/**
+ * update camera orientation based on mouse movement
+ * @param xpos current x position of the mouse
+ * @param ypos current y position of the mouse
+ */
 void Camera::mouseMovement(float xpos, float ypos) {
     float xoffset = xpos - lastMouseX;
     float yoffset = lastMouseY - ypos; // reversed since glfw y-coordinates go from top to bottom
     lastMouseX = xpos;
     lastMouseY = ypos;
-
+    
     xoffset *= mouseSensitivity;
     yoffset *= mouseSensitivity;
-
     yaw += xoffset;
     pitch += yoffset;
 

@@ -1,10 +1,10 @@
-#include <iostream>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
 #include <GLFW/glfw3.h>
 
-
+/**
+ * A class that represents a camera in the scene
+ */
 class Camera {
     public:
         Camera();

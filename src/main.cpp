@@ -3,39 +3,9 @@
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
 #include "glm/gtc/matrix_transform.hpp"
-#include "glm/gtc/type_ptr.hpp"
 #include "camera.h"
-
-// source code for vertex shader
-const char* vertexShaderSource =
-    "#version 330 core\n"
-    "uniform mat4 mvp;\n"
-    "layout (location = 0) in vec3 position;\n"
-    "layout (location = 1) in vec3 color;\n"
-    "out vec3 vertexColor;\n"
-    "void main()\n"
-    "{\n"
-    "    gl_Position = mvp * vec4(position, 1.0);\n"
-    "    vertexColor = color;\n"    
-    "}\n";
-
-// source code for fragment shader
-const char* fragmentShaderSource =
-    "#version 330 core\n"
-    "uniform float time;\n"
-    "in vec3 vertexColor;\n"
-    "out vec4 fragmentColor;\n"
-    "void main()\n"
-    "{\n"
-    "    float red = sin(time) * 0.5 + 0.5;\n"
-    "    fragmentColor = vec4(red, vertexColor.g, vertexColor.b, 1.0);\n"
-    "}\n";
-
-
-constexpr float CAMERA_SPEED = 2.5f;
-// constexpr float WIDTH = 2.5f;
-// constexpr float CAMERA_SPEED = 2.5f;
-constexpr float MOUSE_SENSITIVITY = 0.1f;
+#include "shader.h"
+#include "texture.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
@@ -70,24 +40,52 @@ int main() {
     }
     // set the callbacks
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    glfwSetCursorPosCallback(window, cursor_position_callback);
     glClearColor(0.5f, 0.0f, 0.5f, 1.0f);
 
+    // shader & texture setup
+    Shader shader("assets/shaders/basic.vert", "assets/shaders/basic.frag");
+    Texture texture("assets/textures/hound_in_field_square.png");
+    shader.use();
+    shader.setInt("texture1", 0);
+    texture.bind(0);
 
-
-    // CPU-side vertex data
     float vertices[] = {
-        // Back: indices 0-3
-        -0.5f, -0.5f, -0.5f,   0.0f, 0.0f, 1.0f,
-         0.5f, -0.5f, -0.5f,   1.0f, 0.0f, 0.0f,
-         0.5f,  0.5f, -0.5f,   0.0f, 0.0f, 1.0f,
-        -0.5f,  0.5f, -0.5f,   1.0f, 0.0f, 0.0f,
+        // position                // color             // UV
+        // Back face
+        -0.5f, -0.5f, -0.5f,       0.0f, 0.0f, 1.0f,    0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,       1.0f, 0.0f, 0.0f,    1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,       0.0f, 0.0f, 1.0f,    1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,       1.0f, 0.0f, 0.0f,    0.0f, 1.0f,
 
-        // Front: indices 4-7
-        -0.5f, -0.5f,  0.5f,   1.0f, 0.0f, 0.0f,
-         0.5f, -0.5f,  0.5f,   0.0f, 0.0f, 1.0f,
-         0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,
-        -0.5f,  0.5f,  0.5f,   0.0f, 0.0f, 1.0f
+        // Front face
+        -0.5f, -0.5f,  0.5f,       1.0f, 0.0f, 0.0f,    0.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,       0.0f, 0.0f, 1.0f,    1.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,       1.0f, 0.0f, 0.0f,    1.0f, 1.0f,
+        -0.5f,  0.5f,  0.5f,       0.0f, 0.0f, 1.0f,    0.0f, 1.0f,
+
+        // Left face
+        -0.5f, -0.5f, -0.5f,       0.0f, 0.0f, 1.0f,    0.0f, 0.0f,
+        -0.5f, -0.5f,  0.5f,       1.0f, 0.0f, 0.0f,    1.0f, 0.0f,
+        -0.5f,  0.5f,  0.5f,       0.0f, 0.0f, 1.0f,    1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,       1.0f, 0.0f, 0.0f,    0.0f, 1.0f,
+
+        // Right face
+        0.5f, -0.5f,  0.5f,       0.0f, 0.0f, 1.0f,    0.0f, 0.0f,
+        0.5f, -0.5f, -0.5f,       1.0f, 0.0f, 0.0f,    1.0f, 0.0f,
+        0.5f,  0.5f, -0.5f,       0.0f, 0.0f, 1.0f,    1.0f, 1.0f,
+        0.5f,  0.5f,  0.5f,       1.0f, 0.0f, 0.0f,    0.0f, 1.0f,
+
+        // Top face
+        -0.5f,  0.5f,  0.5f,       0.0f, 0.0f, 1.0f,    0.0f, 0.0f,
+         0.5f,  0.5f,  0.5f,       1.0f, 0.0f, 0.0f,    1.0f, 0.0f,
+         0.5f,  0.5f, -0.5f,       0.0f, 0.0f, 1.0f,    1.0f, 1.0f,
+        -0.5f,  0.5f, -0.5f,       1.0f, 0.0f, 0.0f,    0.0f, 1.0f,
+
+        // Bottom face
+        -0.5f, -0.5f, -0.5f,       0.0f, 0.0f, 1.0f,    0.0f, 0.0f,
+         0.5f, -0.5f, -0.5f,       1.0f, 0.0f, 0.0f,    1.0f, 0.0f,
+         0.5f, -0.5f,  0.5f,       0.0f, 0.0f, 1.0f,    1.0f, 1.0f,
+        -0.5f, -0.5f,  0.5f,       1.0f, 0.0f, 0.0f,    0.0f, 1.0f
     };
 
     // define and upload vertex buffer data to the GPU
@@ -100,25 +98,21 @@ int main() {
     GLuint VAO;
     glGenVertexArrays(1, &VAO);
     glBindVertexArray(VAO);
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, nullptr);
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 6, (void*)(sizeof(float) * 3));
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, nullptr);
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void*)(sizeof(float) * 3));
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 8, (void*)(sizeof(float) * 6));
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
+    glEnableVertexAttribArray(2);
     glEnable(GL_DEPTH_TEST);
 
     GLuint indices[] = {
-        // back triangles
-        0, 2, 1,    0, 3, 2,
-        // front triangles
-        4, 5, 6,    4, 6, 7,
-        // left triangles
-        0, 7, 3,    0, 4, 7,
-        // right
-        1, 2, 6,    1, 6, 5,
-        // top triangles
-        3, 7, 6,    3, 6, 2,
-        // bottom triangles
-        0, 1, 5,    0, 5, 4
+        0,   1,  2,    0,  2,  3,     // back
+        4,   5,  6,    4,  6,  7,     // front
+        8,   9, 10,    8, 10, 11,     // left
+        12, 13, 14,   12, 14, 15,     // right
+        16, 17, 18,   16, 18, 19,     // top
+        20, 21, 22,   20, 22, 23      // bottom
     };
 
     // define and upload element buffer data to the GPU
@@ -126,87 +120,33 @@ int main() {
     glGenBuffers(1, &EBO);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-    GLsizei indexCount = sizeof(indices) / sizeof(indices[0]);
-    GLint success;
+    GLsizei indexCount = std::size(indices);
 
-    // create vertex shader & check compilation
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
-    glCompileShader(vertexShader);
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-    if (success == 0) {
-        GLchar infoLog[512];
-        glGetShaderInfoLog(vertexShader, 512, nullptr, infoLog);
-        std::cerr << "Vertex Shader compilation failure\n" << infoLog << '\n';
-        glfwTerminate();
-        return EXIT_FAILURE;
-    }
-
-    // create fragment shader & check compilation
-    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
-    glCompileShader(fragmentShader);
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-    if (success == 0) {
-        GLchar infoLog[512];
-        glGetShaderInfoLog(fragmentShader, 512, nullptr, infoLog);
-        std::cerr << "Fragment Shader compilation failure\n" << infoLog << '\n';
-        glfwTerminate();
-        return EXIT_FAILURE;
-    }
-
-    // create shader program to link shaders & check linking success
-    GLuint shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (success == 0) {
-        GLchar infoLog[512];
-        glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
-        std::cerr << "Shader Program linking failure\n" << infoLog << '\n';
-        glfwTerminate();
-        return EXIT_FAILURE;
-    }
-
-    // remove shaders and set program state
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-    glUseProgram(shaderProgram);
-
-    GLint timeLocation = glGetUniformLocation(shaderProgram, "time");
-
-    // define transformation matrices for the object
-    glm::mat4 identity = glm::mat4(1.0f);
-    glm::mat4 transform = glm::translate(identity, glm::vec3(0.0f, 0.0f, 0.0f)) * 
-                          glm::rotate(identity, glm::radians(45.0f), glm::vec3(1.0f, 1.0f, 1.0f)) *
-                          glm::scale(identity, glm::vec3(1.2f, 1.2f, 1.2f));
-
-    float yaw = -90.0f;
-    float pitch = 0.0f;
+    glm::vec3 cubePositions[] = {
+        glm::vec3( 0.0f,  0.0f,  0.0f),
+        glm::vec3( 2.0f,  0.0f, -2.0f),
+        glm::vec3(-2.0f,  0.0f, -2.0f),
+        glm::vec3( 0.0f,  2.0f,  2.0f),
+        glm::vec3( 0.0f, -2.0f,  2.0f)
+    };
 
     // camera setup
-    Camera camera = Camera();
+    Camera camera;
     glfwSetWindowUserPointer(window, &camera);
 
     glfwSetCursorPosCallback(window, cursor_position_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    // glm::mat4 view = glm::translate(identity, glm::vec3(0.0f, 0.0f, -3.0f));
     // define model-view-projection matrix
-    glm::mat4 view = camera.getViewMatrix();
+    glm::mat4 view;
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
-    glm::mat4 mvp = projection * view * transform; 
-    GLint mvpLocation = glGetUniformLocation(shaderProgram, "mvp");
+    glm::mat4 identity = glm::mat4(1.0f);
 
-    // initialize timing variables for frame updates
     float currentFrame, deltaTime, lastFrame = 0.0f;
-
-    float lastMouseX = 400.0f;
-    float lastMouseY = 300.0f;
-
-    // render loop
     while (!glfwWindowShouldClose(window)) {
+        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
+            glfwSetWindowShouldClose(window, true);
+        }
         glfwPollEvents();
 
         // update timing variables for the current frame
@@ -214,26 +154,27 @@ int main() {
         deltaTime = currentFrame - lastFrame;
         lastFrame = currentFrame;
 
-        // read user-input and update camera position
+        // read user-input and update camera position and orientation
         camera.cameraMovement(window, deltaTime);
+        view = camera.getViewMatrix();
 
-        if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
-            glfwSetWindowShouldClose(window, true);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        for(std::size_t i = 0; i < std::size(cubePositions); ++i) {
+            glm::mat4 model = glm::translate(identity, cubePositions[i]) 
+                              * glm::rotate(identity, currentFrame * 
+                                glm::radians(15.0f * static_cast<float>(i)) * (i + 1), 
+                                glm::vec3(0.5f, 1.0f, 0.0f));
+            shader.setMat4("mvp", projection * view * model);
+            glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
         }
 
-        // update view and mvp matrices based on the new camera position
-        view = camera.getViewMatrix();
-        mvp = projection * view * transform;
-
-        // clear the screen
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        // set shader uniforms and draw the object
-        glUniform1f(timeLocation, static_cast<float>(glfwGetTime()));
-        glUniformMatrix4fv(mvpLocation, 1, GL_FALSE, glm::value_ptr(mvp));
-        glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);
+        shader.setFloat("time", static_cast<float>(glfwGetTime()));
         glfwSwapBuffers(window);
     }
+
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
 
     glfwTerminate();
     return EXIT_SUCCESS;
