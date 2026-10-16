@@ -27,6 +27,14 @@ glm::mat4 Camera::getViewMatrix() const {
 }
 
 /**
+ * get the current position of the camera
+ * @return camera position as a glm::vec3
+ */
+glm::vec3 Camera::getCameraPosition() const {
+    return cameraPosition;
+}
+
+/**
  * update camera position based on user input
  * @param window pointer to the GLFW window
  * @param deltaTime time elapsed since last frame
