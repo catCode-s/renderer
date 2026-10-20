@@ -2,7 +2,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm/glm.hpp>
-#include <iterator>
 #include <cmath>
 #include "glm/gtc/matrix_transform.hpp"
 #include "geometry/cube.h"
@@ -10,6 +9,8 @@
 #include "camera.h"
 #include "shader.h"
 #include "texture.h"
+#include "renderer.h"
+#include "scene.h"
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos);
@@ -38,12 +39,14 @@ int main() {
         glfwTerminate();
         return EXIT_FAILURE;
     }
+
     // set the callbacks
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glClearColor(0.5f, 0.0f, 0.5f, 1.0f);
 
     glEnable(GL_DEPTH_TEST); // removing this causes interesting occlusion effects
 
+    // run the main render loop
     run(window);
 
     glfwDestroyWindow(window);
@@ -51,15 +54,31 @@ int main() {
     return EXIT_SUCCESS;
 }
 
+/**
+ * callback function for handling framebuffer size changes
+ * @param window the GLFW window
+ * @param width the new width of the framebuffer
+ * @param height the new height of the framebuffer
+ */
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     glViewport(0, 0, width, height);
 }
 
+/**
+ * callback function for handling cursor position changes
+ * @param window the GLFW window
+ * @param xpos the new x position of the cursor
+ * @param ypos the new y position of the cursor
+ */
 void cursor_position_callback(GLFWwindow* window, double xpos, double ypos) {
     Camera* camera = static_cast<Camera*>(glfwGetWindowUserPointer(window));
     camera->mouseMovement(static_cast<float>(xpos), static_cast<float>(ypos));
 }
 
+/**
+ * run the main render loop
+ * @param window the GLFW window
+ */
 void run(GLFWwindow* window) {
     // shader & texture setup
     Shader shader("assets/shaders/basic.vert", "assets/shaders/basic.frag");
@@ -71,13 +90,13 @@ void run(GLFWwindow* window) {
     MeshData cubeData = createCube();
     Mesh cube(cubeData.vertices, cubeData.indices);
 
-    glm::vec3 cubePositions[] = {
-        glm::vec3( 0.0f,  0.0f,  0.0f),
-        glm::vec3( 2.0f,  0.0f, -2.0f),
-        glm::vec3(-2.0f,  0.0f, -2.0f),
-        glm::vec3( 0.0f,  2.0f,  2.0f),
-        glm::vec3( 0.0f, -2.0f,  2.0f)
-    };
+    // create the scene with multiple cubes
+    Scene scene;
+    scene.addObject(cube).getTransform().position = {0.0f, 0.0f, 0.0f};
+    scene.addObject(cube).getTransform().position = {2.0f, 0.0f, -2.0f};
+    scene.addObject(cube).getTransform().position = {-2.0f, 0.0f, -2.0f};
+    scene.addObject(cube).getTransform().position = {0.0f, 2.0f, 2.0f};
+    scene.addObject(cube).getTransform().position = {0.0f, -2.0f, 2.0f};
 
     // camera setup
     Camera camera;
@@ -86,13 +105,13 @@ void run(GLFWwindow* window) {
     glfwSetCursorPosCallback(window, cursor_position_callback);
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
-    // define model-view-projection matrix
-    glm::mat4 view;
+    // set up loop variables and projection matrix
     glm::mat4 projection = glm::perspective(glm::radians(45.0f), 4.0f / 3.0f, 0.1f, 100.0f);
-    glm::mat4 identity = glm::mat4(1.0f);
-
     float currentFrame, deltaTime, lastFrame = 0.0f;
+    glm::vec3 rotationAxis = glm::normalize(glm::vec3(0.5f, 1.0f, 0.0f));
+    Renderer renderer;
 
+    // main render loop
     while (!glfwWindowShouldClose(window)) {
         if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS) {
             glfwSetWindowShouldClose(window, true);
@@ -106,30 +125,28 @@ void run(GLFWwindow* window) {
 
         // update camera position and orientation based on user input
         camera.cameraMovement(window, deltaTime);
-        view = camera.getViewMatrix();
 
         // shader uniforms
         shader.use();
         shader.setVec3("cameraPos", camera.getCameraPosition());
         glm::vec3 lightPos(sin(currentFrame) * 3.0f, 4.0f, cos(currentFrame) * 3.0f);
-        shader.setVec3("lightPos", lightPos);
+        shader.setVec3("lightPos", lightPos);;
 
-        // Render scene
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // update object rotations
+        auto& objects = scene.getObjects();
+        for (std::size_t i = 0; i < objects.size(); ++i) {
+            Transform& transform = objects[i].getTransform();
 
-        for (std::size_t i = 0; i < std::size(cubePositions); ++i) {
-            glm::mat4 model =
-                glm::translate(identity, cubePositions[i]) *
-                glm::rotate(identity, currentFrame 
-                            * glm::radians(15.0f * static_cast<float>(i)) 
-                            * (i + 1), glm::vec3(0.5f, 1.0f, 0.0f));
-
-            shader.setMat4("mvp", projection * view * model);
-            shader.setMat4("model", model);
-
-            cube.draw();
+            transform.rotation = glm::angleAxis(
+                currentFrame *
+                glm::radians(15.0f * static_cast<float>(i)) *
+                (i + 1),
+                rotationAxis
+            );
         }
 
+        // Render scene
+        renderer.render(scene, camera, shader, projection);
         glfwSwapBuffers(window);
     }
 }

@@ -3,6 +3,7 @@
 /**
  * constructor for camera class
  * initializes camera position, orientation, and movement parameters
+ * @return initialized camera object
  */
 Camera::Camera() {
     cameraPosition = glm::vec3(0.0f, 0.0f, 3.0f);

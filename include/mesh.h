@@ -4,6 +4,9 @@
 #include <glm/glm.hpp>
 #include <vector>
 
+/**
+ * Represents a single vertex of a mesh, including its position, color, normal, and UV coordinates.
+ */
 struct Vertex {
     glm::vec3 position;
     glm::vec3 color;
@@ -11,11 +14,17 @@ struct Vertex {
     glm::vec2 uv;
 };
 
+/**
+ * Represents the raw data of a mesh, including its vertices and indices.
+ */
 struct MeshData {
     std::vector<Vertex> vertices;
     std::vector<GLuint> indices;
 };
 
+/**
+ * Represents a mesh in the scene, including its vertices and indices.
+ */
 class Mesh {
     public:
         Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices);

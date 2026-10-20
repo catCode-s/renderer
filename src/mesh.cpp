@@ -1,6 +1,11 @@
 #include "mesh.h"
 #include <cstddef>
 
+/**
+ * constructor for Mesh
+ * @param vertices the list of vertices
+ * @param indices the list of indices
+ */
 Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices)
     : indexCount(static_cast<GLsizei>(indices.size())) {
     
@@ -41,12 +46,18 @@ Mesh::Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indic
     glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
+/**
+ * destructor for Mesh
+ */
 Mesh::~Mesh() {
     glDeleteVertexArrays(1, &vao);
     glDeleteBuffers(1, &vbo);
     glDeleteBuffers(1, &ebo);
 }
 
+/**
+ * draw the mesh
+ */
 void Mesh::draw() const {
     glBindVertexArray(vao);
     glDrawElements(GL_TRIANGLES, indexCount, GL_UNSIGNED_INT, nullptr);

@@ -1,8 +1,13 @@
 #include "geometry/cube.h"
 
+/**
+ * create a cube mesh
+ * @return the MeshData object representing the cube
+ */
 MeshData createCube() {
     MeshData cube;
 
+    // define the vertices for the cube
     cube.vertices = {
         // Back face (-Z)
         {{-0.5f, -0.5f, -0.5f}, {0, 0, 1}, {0, 0, -1}, {0, 0}},
@@ -41,6 +46,7 @@ MeshData createCube() {
         {{-0.5f, -0.5f,  0.5f}, {1, 0, 0}, {0, -1, 0}, {0, 1}}
     };
 
+    // define the indices for the cube
     cube.indices = {
          0,  2,  1,   0,  3,  2,  // Back
          4,  5,  6,   4,  6,  7,  // Front
