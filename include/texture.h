@@ -7,15 +7,15 @@
  * A class that represents a texture in OpenGL
  */
 class Texture {
-    public:
-        explicit Texture(const std::string& path);
-        ~Texture();
+public:
+    explicit Texture(const std::string& path);
+    ~Texture();
 
-        Texture(const Texture&) = delete;
-        Texture& operator=(const Texture&) = delete;
+    Texture(const Texture&) = delete;
+    Texture& operator=(const Texture&) = delete;
 
-        void bind(GLuint unit = 0) const;
+    void bind(GLuint unit = 0) const;
 
-    private:
-        GLuint texture;
+private:
+    GLuint texture;
 };

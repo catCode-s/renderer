@@ -23,17 +23,13 @@ Camera::Camera() {
  * get the view matrix for the camera
  * @return view matrix based on camera position and orientation
  */
-glm::mat4 Camera::getViewMatrix() const {
-    return glm::lookAt(cameraPosition, cameraPosition + cameraFront, cameraUp);
-}
+glm::mat4 Camera::getViewMatrix() const { return glm::lookAt(cameraPosition, cameraPosition + cameraFront, cameraUp); }
 
 /**
  * get the current position of the camera
  * @return camera position as a glm::vec3
  */
-glm::vec3 Camera::getCameraPosition() const {
-    return cameraPosition;
-}
+glm::vec3 Camera::getCameraPosition() const { return cameraPosition; }
 
 /**
  * update camera position based on user input
@@ -62,7 +58,7 @@ void Camera::mouseMovement(float xpos, float ypos) {
     float yoffset = lastMouseY - ypos; // reversed since glfw y-coordinates go from top to bottom
     lastMouseX = xpos;
     lastMouseY = ypos;
-    
+
     xoffset *= mouseSensitivity;
     yoffset *= mouseSensitivity;
     yaw += xoffset;

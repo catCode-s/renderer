@@ -6,7 +6,7 @@
 #include <stdexcept>
 
 /**
- * constructor for texture class, 
+ * constructor for texture class,
  * loads texture from a file and create an OpenGL texture object
  * @param path path to the texture file
  * @throws std::runtime_error if the texture cannot be loaded
@@ -36,9 +36,7 @@ Texture::Texture(const std::string& path) {
 /*
  * destructor for texture class
  */
-Texture::~Texture() {
-    glDeleteTextures(1, &texture);
-}
+Texture::~Texture() { glDeleteTextures(1, &texture); }
 
 /**
  * bind the texture to a specified texture unit

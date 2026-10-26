@@ -26,18 +26,18 @@ struct MeshData {
  * Represents a mesh in the scene, including its vertices and indices.
  */
 class Mesh {
-    public:
-        Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices);
-        ~Mesh();
+public:
+    Mesh(const std::vector<Vertex>& vertices, const std::vector<GLuint>& indices);
+    ~Mesh();
 
-        Mesh(const Mesh&) = delete;
-        Mesh& operator=(const Mesh&) = delete;
+    Mesh(const Mesh&) = delete;
+    Mesh& operator=(const Mesh&) = delete;
 
-        void draw() const;
+    void draw() const;
 
-    private:
-        GLuint vao = 0;
-        GLuint vbo = 0;
-        GLuint ebo = 0;
-        GLsizei indexCount = 0;
+private:
+    GLuint vao = 0;
+    GLuint vbo = 0;
+    GLuint ebo = 0;
+    GLsizei indexCount = 0;
 };

@@ -23,14 +23,8 @@ void main() {
     float spec = pow(max(dot(reflectDir, viewDir), 0.0), 32.0);
 
     float specular = specularIntensity * spec;
-
-    //float red = sin(time) * 0.5 + 0.5;
     vec4 texColor = texture(texture1, fragUV);
-
-    //vec4 baseColor = vec4(0.0, vertexColor.g, vertexColor.b, 1.0) * texColor;
-     vec4 baseColor = vec4(0.0, 0.8, 0.2, 1.0) * texColor;
-
+    vec4 baseColor = vec4(0.0, 0.8, 0.2, 1.0) * texColor;
     vec3 result = baseColor.rgb * vec3(ambient + diff) + vec3(specular);
-
     fragmentColor = vec4(result, baseColor.a);
 }

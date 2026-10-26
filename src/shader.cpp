@@ -29,7 +29,7 @@ std::string Shader::readFile(const std::string& path) {
  * @param source source code of the shader
  * @throws std::runtime_error if the shader cannot be compiled
  * @return ID of the compiled shader, throws std::runtime_error if the shader cannot be compiled
-*/
+ */
 GLuint Shader::compileShader(GLenum type, const std::string& source) {
     GLuint shader = glCreateShader(type);
 
@@ -52,7 +52,7 @@ GLuint Shader::compileShader(GLenum type, const std::string& source) {
 }
 
 /**
- * constructor for the shader class, 
+ * constructor for the shader class,
  * creates a shader program from vertex and fragment shader source files
  * @param vertexPath path to the vertex shader source file
  * @param fragmentPath path to the fragment shader source file
@@ -88,16 +88,12 @@ Shader::Shader(const std::string& vertexPath, const std::string& fragmentPath) {
 /**
  * destructor for shader class
  */
-Shader::~Shader() {
-    glDeleteProgram(program);
-}
+Shader::~Shader() { glDeleteProgram(program); }
 
 /**
  * use the shader program for rendering
  */
-void Shader::use() const {
-    glUseProgram(program);
-}
+void Shader::use() const { glUseProgram(program); }
 
 /**
  * set an int uniform value for the shader program

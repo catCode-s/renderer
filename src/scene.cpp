@@ -20,41 +20,31 @@ SceneObject& Scene::addObject(Mesh& mesh) {
  * get the list of scene objects in the scene
  * @return a reference to the vector of scene objects
  */
-std::vector<SceneObject>& Scene::getObjects() {
-    return objects;
-}
+std::vector<SceneObject>& Scene::getObjects() { return objects; }
 
 /**
  * get the list of scene objects in the scene (const version)
  * @return a const reference to the vector of scene objects
  */
-const std::vector<SceneObject>& Scene::getObjects() const {
-    return objects;
-}
+const std::vector<SceneObject>& Scene::getObjects() const { return objects; }
 
 /**
  * get the transform of the scene object
  * @return a reference to the transform
  */
-Transform& SceneObject::getTransform() {
-    return transform;
-}
+Transform& SceneObject::getTransform() { return transform; }
 
 /**
  * get the transform of the scene object (const version)
  * @return a const reference to the transform
  */
-const Transform& SceneObject::getTransform() const {
-    return transform;
-}
+const Transform& SceneObject::getTransform() const { return transform; }
 
 /**
  * get the mesh of the scene object (const version)
  * @return a const reference to the mesh
  */
-const Mesh& SceneObject::getMesh() const {
-    return *mesh;
-}
+const Mesh& SceneObject::getMesh() const { return *mesh; }
 
 /**
  * get the model matrix of the transform
